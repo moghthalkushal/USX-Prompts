@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Prompt Library | US Market</title>
+    <meta name="description" content="A curated collection of US-specific prompts for financial analysis using LLMs (10-K, 10-Q, Earnings, Valuation).">
+    
+    <!-- Tailwind CSS for rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Smooth scrolling */
+        html { scroll-behavior: smooth; }
+        
+        /* Custom Scrollbar for code blocks */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* Toast Animation */
+        @keyframes slideIn {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .toast {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        .toast.hiding {
+            animation: fadeOut 0.3s ease-in forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-800 to-slate-900 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-md">US</div>
+                <h1 class="font-bold text-lg tracking-tight">Prompt Library</h1>
+            </div>
+            <a href="https://github.com/moghthalkushal" target="_blank" class="text-sm text-slate-500 hover:text-blue-800 font-medium transition-colors">
+                About
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-3xl mx-auto px-4 py-8 space-y-8">
+
+        <!-- Intro Card -->
+        <div class="bg-gradient-to-r from-blue-800 to-slate-900 rounded-2xl p-6 text-white shadow-lg shadow-blue-900/10">
+            <h2 class="text-2xl font-bold mb-2">US Market Analyst</h2>
+            <p class="text-blue-100 mb-6">Master prompts for <strong>Wall St.</strong> analysis (10-K Mining, DCF, Moats, Earnings). Optimized for ChatGPT, Claude, and Gemini.</p>
+            
+            <!-- Search Input -->
+            <div class="relative">
+                <svg class="absolute left-3 top-3.5 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <input type="text" id="searchInput" placeholder="Search prompts (e.g., '10-K', 'Valuation', 'Moat')..." 
+                    class="w-full pl-10 pr-4 py-3 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/30 transition-shadow font-medium">
+            </div>
+        </div>
+
+        <!-- Prompts Container -->
+        <div id="promptsList" class="space-y-6">
+            <!-- Prompts will be injected here via JS -->
+        </div>
+
+        <!-- Global Add-on Section -->
+        <div class="mt-12 pt-8 border-t border-slate-200">
+            <div class="bg-slate-900 rounded-2xl p-6 text-slate-200 shadow-xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Global Rule Injection
+                    </h3>
+                    <button onclick="copyToClipboard('global-rules')" class="text-xs bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg transition-colors border border-slate-700 font-medium">
+                        Copy Rules
+                    </button>
+                </div>
+                <p class="text-sm text-slate-400 mb-4">Paste this at the end of *any* prompt above to enforce strict output formatting and fact-checking.</p>
+                <div class="bg-black/50 rounded-xl p-4 border border-slate-700 overflow-x-auto">
+                    <pre id="global-rules" class="font-mono text-xs text-green-400 whitespace-pre-wrap">Quality rules (mandatory):
+
+1. Separate Facts / Inferences / Assumptions.
+2. Start with bear case first, then base, then bull.
+3. If you can’t verify a figure, write Unknown and list the exact doc/source to check (10-K, 10-Q, earnings deck, transcript).
+4. Provide a final checklist of 10 items I should validate manually.
+5. Avoid hype language; be specific.
+6. If you want, tell me your investor persona (e.g., “US large-cap quality, 3–5y, avoid loss-making, okay with tech”) and I’ll also create a single mega-prompt that produces a consistent one-page “research note” every time you paste a ticker.</pre>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 text-center text-slate-400 text-sm">
+        <p>Use these prompts with caution. LLMs can hallucinate financial data.</p>
+        <p class="mt-2">Always verify against source documents (SEC EDGAR).</p>
+        <div class="mt-8 pt-6 border-t border-slate-200 w-full max-w-xs mx-auto">
+            <p class="text-xs text-slate-500">
+                Created by 
+                <a href="https://github.com/moghthalkushal" target="_blank" class="font-medium text-blue-600 hover:text-blue-800 hover:underline transition-colors">
+                    @moghthalkushal
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 hidden z-50">
+        <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        <span class="font-medium">Copied to clipboard</span>
+    </div>
+
+    <!-- Data & Script -->
+    <script>
+        const prompts = [
+            {
+                id: 1,
+                title: "US Stock Screener",
+                tags: ["US", "Screening", "Fundamental"],
+                content: `You are a US sell-side equity analyst. Screen and rank Top 20 US-listed stocks for my profile and provide an investable shortlist.
+My profile:
+Risk: [Low/Med/High] | Horizon: [1–3y / 3–5y / 5y+] | Style: [Value/GARP/Growth/Dividend]
+Sectors preferred: [ ] | Avoid: [ ] | Market cap: [Large/Mid/Small/Any]
+Constraints: [e.g., avoid high debt, avoid biotech, prefer profitable]
+
+Hard filters (must apply):
+1. Positive FCF in TTM OR clear path to FCF within 12–18 months (state which)
+2. Revenue growth and gross margin trend (3Y + TTM)
+3. Balance sheet: Net debt/EBITDA, interest coverage (or “net cash”)
+4. ROIC (or ROE/ROA where ROIC not meaningful) + trend
+5. Dilution: shares outstanding + SBC trend (3Y) + net buybacks
+6. Factor tagging (must label each stock): Quality / Value / Momentum / Low Vol / Growth / Dividend / Cyclical
+
+Valuation (required):
+- Relative: vs peer group + vs its own history (e.g., 5Y range/median)
+- Include 2–3 multiples relevant to the business (PE, EV/EBITDA, EV/FCF, P/S, FCF yield).
+
+Output format:
+1. Ranked table (Top 20) with: ticker, sector, market cap bucket, rev growth, EBIT/FCF margin, ROIC, net debt/EBITDA, FCF yield, SBC %, buyback %, valuation vs peers, factor tag, 1-line thesis
+2. Top 5 deep dives: bull/base/bear thesis, key KPIs to track, and 3 catalysts (12–18m)
+3. Reject list (10): what disqualified them (e.g., valuation too stretched, weak cash conversion, high dilution)
+
+Rules: separate facts vs assumptions; if data is missing, mark Unknown and list what to verify.`
+            },
+            {
+                id: 2,
+                title: "US DCF + Multiples",
+                tags: ["US", "Valuation", "DCF"],
+                content: `You are a valuation lead building an institutional-grade model for [TICKER]. Deliver a DCF + comps + unit economics memo.
+Required sections:
+A) Business model & unit economics (choose the relevant set):
+- Subscription/SaaS: ARPU, churn/NRR, CAC, LTV, payback, gross margin, S&M efficiency
+- Marketplace: take rate, GMV growth, cohorts, contribution margin
+- Consumer/platform: engagement, monetization, ad load, TAC, ARPU, churn
+- Industrial/retail: volume, price, utilization, same-store sales, inventory turns
+
+B) Forecast model (5 years):
+- Revenue drivers (explicit) + margin bridge (gross → operating)
+- Reinvestment: capex, working capital, R&D capitalization if relevant
+- SBC treatment: show value impact via dilution (share count path) and/or expense normalization (state approach)
+
+C) Cost of capital:
+- WACC assumptions and justification (Rf, ERP, beta, size/sector adjustments if used)
+- Terminal value using BOTH perpetuity and exit multiple (justify multiple with comps)
+
+D) Sensitivities (must):
+- WACC × terminal growth
+- Revenue CAGR × operating margin
+- Optional: churn / take-rate / utilization sensitivity (depending on business)
+
+Output:
+1. Valuation range (bear/base/bull) + implied IRR from current price
+2. “5 break assumptions” that would invalidate the base case
+3. 10-item diligence checklist (what to verify in filings / investor decks)`
+            },
+            {
+                id: 3,
+                title: "10-K / 10-Q Risk Mining",
+                tags: ["US", "Risk", "SEC Filings"],
+                content: `Act as a US public markets risk analyst. Review the latest 10-K and most recent 10-Q for [TICKER]. Build a risk register and decision triggers.
+
+Extract & structure:
+1. Top 10 risks ranked by (Severity × Probability × Near-term relevance)
+2. Revenue recognition: key judgments, performance obligations, variable consideration, seasonality
+3. Legal/regulatory: active investigations, material lawsuits, privacy/antitrust, sanctions/export controls if relevant
+4. Segment changes and accounting policy changes (what changed and why)
+5. Off-balance-sheet & commitments: leases, guarantees, purchase obligations
+6. Working capital and liquidity: debt covenants, maturity wall, refinancing risk
+7. “Weasel words / tone shifts”: list 5–10 phrases and what they might signal (without being sensational)
+
+Output format:
+1. Risk register table: Risk | Evidence/quote location | Leading indicator | Mitigation | Trigger to reassess | Severity/Prob score
+2. “What would change my mind”: 5 disconfirming signals and what data proves them.`
+            },
+            {
+                id: 4,
+                title: "Earnings Call Edge",
+                tags: ["US", "Earnings", "Guidance"],
+                content: `You are an analyst preparing an earnings note on [TICKER]. Summarize the last 2 earnings calls + press releases.
+Must include:
+1. Guidance: what changed vs last quarter; quantify revisions
+2. Drivers: revenue mix, pricing, volumes, churn/NRR, backlog, capacity, etc. (as applicable)
+3. Margin drivers: gross margin bridge + opex discipline
+4. Competitive mentions: named competitors, pricing pressure, share gains/losses
+5. Q&A heatmap: categorize analyst questions (pricing, demand, margins, capital allocation) and management confidence level
+6. “What was NOT said”: 5 meaningful omissions compared to prior calls
+
+Output:
+1. 1-page “earnings takeaway” + 10 questions to ask next call
+2. Bull/base/bear catalysts for next 2 quarters
+3. KPI watchlist (8–12 metrics)`
+            },
+            {
+                id: 5,
+                title: "Options & Positioning",
+                tags: ["US", "Derivatives", "Sentiment"],
+                content: `You are an options market observer (no trading instructions). For [TICKER], interpret market-implied expectations.
+Analyze at a high level:
+1. Implied volatility regime vs recent realized volatility
+2. Skew (puts vs calls): what tail risks are priced
+3. Open interest concentration by strike/expiry and what price zones it implies
+4. Event pricing: earnings date vs non-event periods
+5. “Market is pricing” scenarios: base / upside / downside with approximate probability language (qualitative if needed)
+
+Output: 1) summary bullets 2) risk notes 3) what additional data would improve confidence.`
+            },
+            {
+                id: 6,
+                title: "Competitive Moat / Market Map",
+                tags: ["US", "Strategy", "Moat"],
+                content: `Act as a strategy consultant + equity analyst for sector [X]. Build a market map and identify investable winners.
+Deliverables:
+1. TAM/SAM/SOM with assumptions and 2 alternative TAM views
+2. Value chain map: suppliers → channels → customers
+3. Competitive landscape: top 8 players + positioning (price, differentiation, distribution, tech moat)
+4. Switching costs, regulatory moats, network effects, scale economies
+5. Innovation pipeline: AI/product roadmap, patents, R&D intensity
+
+Output:
+1. Pick 1 leader + 1 challenger + 1 “avoid”
+2. For each pick: catalysts (12–18m), moat durability score, and what would disconfirm the thesis.`
+            },
+            {
+                id: 7,
+                title: "Portfolio Construction (ETF)",
+                tags: ["US", "Portfolio", "Allocation"],
+                content: `You are a portfolio strategist. Build a diversified US portfolio using ETFs + optional single stocks.
+Inputs:
+Risk [ ] | Horizon [ ] | Target return [ ] | Max drawdown tolerance [ ]
+Account type: [Taxable / IRA / 401k / mix]
+Preferences: [Dividend / Growth / Factor tilt / ESG / avoid sectors]
+
+Construct:
+1. Core ETFs (US total/large, ex-US, bonds, TIPS, REIT, gold optional)
+2. Satellite tilts (quality/value/small cap/tech/healthcare)
+3. Optional: up to 10 single stocks (if appropriate)
+
+Output:
+1. Allocation table with rationale
+2. Expected return range + worst-year estimate + drawdown estimate
+3. Rebalancing policy (bands/time)
+4. Tax efficiency notes (asset location logic; dividend/turnover considerations)
+5. “If rates rise/fall” and “if recession hits” adjustment rules.`
+            },
+            {
+                id: 8,
+                title: "Quality of Earnings Check",
+                tags: ["US", "Accounting", "Red Flags"],
+                content: `You are a forensic accounting analyst. Assess [TICKER] earnings quality and produce a red-flag score.
+Check:
+1. Accruals vs cash earnings; CFO vs net income trend
+2. One-time items frequency; “adjusted EBITDA” add-backs quality
+3. Revenue concentration and contract risk
+4. Working capital distortions (DSO, inventory, payables stretching)
+5. SBC and dilution; buyback effectiveness (net reduction?)
+6. Capitalized costs (software, R&D, commissions) and amortization impact
+7. Off-balance-sheet commitments; lease intensity
+
+Output:
+1. Red-flag score (0–100) + why
+2. 10 red flags to monitor quarterly
+3. “If I’m wrong” list: evidence that would reduce the score.`
+            },
+            {
+                id: 9,
+                title: "Macro Sensitivity Heatmap",
+                tags: ["US", "Macro", "Risk"],
+                content: `You are a macro + equity cross-asset strategist. For my holdings [list with weights], estimate sensitivity to: rates, inflation, USD, oil, and credit spreads.
+
+For each holding, map:
+1. Primary revenue geography + cost base currency
+2. Rate sensitivity (duration-like behavior for growth; bank NIM; REIT cap rates)
+3. Commodity input sensitivity (energy/materials)
+4. Credit sensitivity (high leverage/refinancing wall)
+
+Provide 3 macro scenarios:
+1. soft landing + slow disinflation
+2. recession + fast rate cuts
+3. inflation re-acceleration + higher-for-longer
+
+Output: portfolio heatmap + recommended tilts + what indicators to watch monthly.`
+            },
+            {
+                id: 10,
+                title: "Valuation vs History",
+                tags: ["US", "Valuation", "Multiples"],
+                content: `You are an equity strategist. For [TICKER], compare valuation vs its own history and explain what’s implied.
+Must include:
+1. PE / EV-EBITDA / EV-Sales / EV-FCF / FCF yield (choose the relevant set)
+2. Compare to: 5Y range/median + peer group
+3. Decompose returns: multiple expansion vs EPS/FCF growth vs buybacks/dividends
+4. Identify “what the market is assuming” about growth and margins
+
+Output:
+1. 3 valuation narratives: cheap for a reason / fair / expensive but justified
+2. 5 catalysts that could change the multiple
+3. Invalidation conditions (what data would prove each narrative wrong).`
+            }
+        ];
+
+        // Render Prompts
+        const promptsList = document.getElementById('promptsList');
+        const searchInput = document.getElementById('searchInput');
+
+        function renderPrompts(filterText = '') {
+            promptsList.innerHTML = '';
+            
+            const filtered = prompts.filter(p => 
+                p.title.toLowerCase().includes(filterText.toLowerCase()) || 
+                p.tags.some(tag => tag.toLowerCase().includes(filterText.toLowerCase())) ||
+                p.content.toLowerCase().includes(filterText.toLowerCase())
+            );
+
+            if (filtered.length === 0) {
+                promptsList.innerHTML = `
+                    <div class="text-center py-12 text-slate-400">
+                        <p class="text-lg">No prompts found matching "${filterText}"</p>
+                    </div>`;
+                return;
+            }
+
+            filtered.forEach(prompt => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden";
+                
+                card.innerHTML = `
+                    <div class="p-5 border-b border-slate-100 flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center gap-3 mb-1">
+                                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded-full">#${prompt.id}</span>
+                                <h3 class="font-bold text-lg text-slate-800">${prompt.title}</h3>
+                            </div>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                ${prompt.tags.map(tag => `<span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200">${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                        <button onclick="copyToClipboard('prompt-${prompt.id}')" class="group flex items-center gap-2 bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-700 border border-slate-200 hover:border-blue-200 px-4 py-2 rounded-lg transition-all active:scale-95">
+                            <span class="text-sm font-medium">Copy</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                        </button>
+                    </div>
+                    <div class="p-0 bg-slate-50/50">
+                        <pre id="prompt-${prompt.id}" class="p-5 font-mono text-sm text-slate-700 whitespace-pre-wrap leading-relaxed overflow-x-auto custom-scrollbar border-l-4 border-transparent hover:border-blue-300 transition-colors">${prompt.content}</pre>
+                    </div>
+                `;
+                promptsList.appendChild(card);
+            });
+        }
+
+        // Copy Logic
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast();
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand("Copy");
+                textArea.remove();
+                showToast();
+            });
+        }
+
+        // Toast Logic
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('hidden', 'hiding');
+            
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                    toast.classList.remove('hiding');
+                }, 300);
+            }, 2000);
+        }
+
+        // Search Listener
+        searchInput.addEventListener('input', (e) => {
+            renderPrompts(e.target.value);
+        });
+
+        // Initial Render
+        renderPrompts();
+
+    </script>
+</body>
+</html>
